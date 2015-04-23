@@ -29,7 +29,7 @@ namespace ChatCensor
 
         public override string Description
         {
-            get { return "Censors words in chat."; }
+            get { return "Kicks bad words (in the face)."; }
         }
 
         public List<string> CensoredWords;
@@ -47,38 +47,42 @@ namespace ChatCensor
 
             //Hook into the chat. This specific hook catches the chat before it is sent out to other clients.
             //This allows us to edit the chat message before others get it.
-            ServerApi.Hooks.ClientChat.Register(this, OnChat);
+            ServerApi.Hooks.ServerChat.Register(this, OnChat);
 
             //This hook is a part of TShock and not a part of TS-API. There is a strict distinction between those two assemblies.
             //This event is provided through the C# ``event`` keyword, which is a feature of the language itself.
-            GeneralHooks.ReloadEvent += OnReloadEvent;
+            GeneralHooks.ReloadEvent += OnReload;
         }
 
-        private void OnReloadEvent(ReloadEventArgs reloadEventArgs)
+        private void OnReload(ReloadEventArgs reloadEventArgs)
         {
             GetCensoredWordsFromFile(_censorFilePath);
         }
 
         private void GetCensoredWordsFromFile(string path)
         {
-            if (Directory.Exists(path))
+            if (File.Exists(path))
+            {
                 CensoredWords = File.ReadAllLines(path).ToList();
+            }
             else
             {
                 CensoredWords = new List<string>();
                 TShock.Log.ConsoleError("Censored words file not found. It has been made for you. " +
                                         "Please edit the file with words you wish to be censored (one word per line). " +
                                         "Then use the /reload command.");
+                File.WriteAllText(path, "");
             }
         }
 
-        private void OnChat(ChatEventArgs args)
+        private void OnChat(ServerChatEventArgs args)
         {
-            //Take each censored word and replace it with a starred out equivalent.
-            //By overwriting ``args.Message`` you're able to alter the chat message that's sent out.
+            //Kick anybody who uses bad words.
             foreach (var word in CensoredWords)
             {
-                args.Message = args.Message.Replace(word, new String('*', word.Length));
+                if (args.Text.Contains(word))
+                    TShock.Utils.Kick(TShock.Players[args.Who], "You said a bad word.");
+
             }
         }
 
@@ -86,7 +90,8 @@ namespace ChatCensor
         {
             if (disposing)
             {
-                ServerApi.Hooks.ClientChat.Deregister(this, OnChat);
+                ServerApi.Hooks.ServerChat.Deregister(this, OnChat);
+                GeneralHooks.ReloadEvent -= OnReload;
             }
             base.Dispose(disposing);
         }
