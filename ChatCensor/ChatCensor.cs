@@ -9,7 +9,7 @@ using TShockAPI.Hooks;
 
 namespace ChatCensor
 {
-    [ApiVersion(1,17)]
+    [ApiVersion(1, 20)]
     public class ChatCensor : TerrariaPlugin
     {
         public override string Name
