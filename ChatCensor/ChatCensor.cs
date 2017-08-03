@@ -9,28 +9,16 @@ using TShockAPI.Hooks;
 
 namespace ChatCensor
 {
-    [ApiVersion(1, 21)]
+    [ApiVersion(2, 1)]
     public class ChatCensor : TerrariaPlugin
     {
-        public override string Name
-        {
-            get { return "ChatCensor"; }
-        }
+        public override string Name => "ChatCensor";
 
-        public override Version Version
-        {
-            get { return new Version(1,0,0); }
-        }
+        public override Version Version => new Version(1,0,0);
 
-        public override string Author
-        {
-            get { return "Ijwu"; }
-        }
+        public override string Author => "Ijwu";
 
-        public override string Description
-        {
-            get { return "Kicks bad words (in the face)."; }
-        }
+        public override string Description => "Kicks bad words (in the face).";
 
         public List<string> CensoredWords;
         private string _censorFilePath = Path.Combine(TShock.SavePath, "censored.txt");
